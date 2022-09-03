@@ -98,6 +98,17 @@ export default {
         console.log(res)
         Notify({ type: 'success', message: '登录成功' })
         setToken(res.data.data.token)
+        // 跳转写在最后面，尽量最后执行
+        // location 当前浏览器地址和跳转地址一样，(不包含#后面内容) -> 不会刷新页面
+        // location.href = 'http://localhost:8080/#/layout'
+        // this.$router.push() 压栈(会产生历史记录)
+        // this.$router.replace() 替换(不会产生历史记录)
+        this.$router.push({
+          path: '/layout'
+        })
+        // this.$router.replace({
+
+        // })
       } catch (err) {
         Notify({ type: 'danger', message: '账号或密码错误' })
       }
