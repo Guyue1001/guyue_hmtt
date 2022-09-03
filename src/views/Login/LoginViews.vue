@@ -17,13 +17,15 @@
    -->
   <van-field
     v-model="user.mobile"
+    required
     name="mobile"
     label="手机号"
     placeholder="请输入11位手机号"
-    :rules="[{ required: true, message: '请填写手机号', pattern: /^1[3-9]\d{9}$/ }]"
+    :rules="[{ required: true, message: '请填写正确格式的手机号', pattern: /^1[3-9]\d{9}$/ }]"
   />
   <van-field
     v-model="user.code"
+    required
     type="password"
     name="code"
     label="密码"
@@ -46,7 +48,16 @@
            时submit提交整个表单功能的按钮
 
      -->
-    <van-button round block type="info" native-type="submit">提交</van-button>
+    <van-button
+      :loading="isLoading"
+      :disabled="isLoading"
+      loading-text="加载中"
+      round
+      block
+      type="info"
+      native-type="submit"
+      >提交
+    </van-button>
   </div>
 </van-form>
 
@@ -54,7 +65,15 @@
 </template>
 
 <script>
+/*
+实现顶部导航自定义样式
+实现表单组件 读-改-写
+收集值以后，调用接口 ，查看登录结果
+点击登录后给用户提示，防止用户频繁点击
+*/
 import { loginAPI } from '@/api'
+import { Notify } from 'vant'
+import { setToken } from '@/utils/token'
 export default {
   name: 'LoginViews',
   data () {
@@ -62,17 +81,27 @@ export default {
       user: {
         mobile: '18120464651', // 手机号
         code: '246810' // 密码 246810
-      }
+      },
+      isLoading: false // 登录按钮的加载状态
     }
   },
   methods: {
     async onSubmit (values) {
-      const res = await loginAPI({
-        mobile: this.user.mobile,
-        code: this.user.code
-        // ...this.suer
-      })
-      console.log(res)
+      console.log('submit', values)
+      this.isLoading = true
+      try {
+        const res = await loginAPI({
+          mobile: this.user.mobile,
+          code: this.user.code
+          // ...this.suer
+        })
+        console.log(res)
+        Notify({ type: 'success', message: '登录成功' })
+        setToken(res.data.data.token)
+      } catch (err) {
+        Notify({ type: 'danger', message: '账号或密码错误' })
+      }
+      this.isLoading = false // 网络请求完成，不论成功还是失败都还原
     }
   }
 }
